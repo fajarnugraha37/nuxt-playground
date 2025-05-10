@@ -18,5 +18,18 @@ export default defineNuxtConfig({
         storesDirs: [
             './stores/**',
         ],
+    },
+    ui: {
+        theme: {
+            transitions: true
+        }
+    },
+    routeRules: {
+        '/**': {
+            cors: false,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            }
+        }
     }
 })

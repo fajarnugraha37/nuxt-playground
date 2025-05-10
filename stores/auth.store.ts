@@ -1,4 +1,4 @@
-import {defineStore} from 'pinia';
+import {FetchError} from "ofetch";
 
 type AuthState = {
     accessToken?: string | null;
@@ -16,76 +16,93 @@ type AuthActions = {
     doSignOut: () => Promise<void>;
 }
 
-export const authStore = defineStore<"auth", AuthState, AuthGetters, AuthActions>('auth', {
-    state: () => {
-        return {
-            // all these properties will have their type inferred automatically
-            isAuthenticated: false,
-        }
-    },
-    actions: {
-        async doSignIn(username, password, expiresInMins = 30) {
-            try {
-                this.state = "PENDING";
-                const {accessToken, refreshToken} = await fetch(
-                    "https://dummyjson.com/auth/login",
-                    {
-                        method: "POST",
-                        headers: {"Content-Type": "application/json"},
-                        body: JSON.stringify({
-                            username: username,
-                            password: password,
-                            expiresInMins: expiresInMins,
-                        }),
-                        // credentials: "include",
-                    }
-                ).then((r) => r.json());
+export type AuthStoreType = ReturnType<typeof authStore>;
 
-                this.accessToken = accessToken;
-                this.refreshToken = refreshToken;
-                this.isAuthenticated = true;
-                this.error = null;
-            } catch (error) {
-                this.error = error;
-                this.isAuthenticated = false;
-            } finally {
-                this.state = "DONE";
+export const authStoreKey = "auth-store";
+
+export const authStore = defineStore<
+    "auth",
+    AuthState,
+    AuthGetters,
+    AuthActions
+>(
+    'auth',
+    {
+        state: () => {
+            return {
+                // all these properties will have their type inferred automatically
+                isAuthenticated: false,
             }
         },
-        async doSignOut() {
-            this.accessToken = null;
-            this.refreshToken = null;
-            this.isAuthenticated = false;
-            this.error = null;
-        },
-        async doRefreshToken() {
-            try {
-                this.state = "PENDING";
-                const {accessToken, refreshToken} = await fetch(
-                    "https://dummyjson.com/auth/refresh",
-                    {
-                        method: "POST",
-                        headers: {"Content-Type": "application/json"},
-                        body: JSON.stringify({
-                            refreshToken: this.refreshToken!, // Optional, if not provided, the server will use the cookie
-                            expiresInMins: 30, // optional (FOR ACCESS TOKEN), defaults to 60
-                        }),
-                        credentials: "include", // Include cookies (e.g., accessToken) in the request
-                    }
-                ).then((res) => res.json());
+        getters: {},
+        actions: {
+            async doSignIn(username, password, expiresInMins = 30) {
+                try {
+                    this.state = "PENDING";
+                    const {accessToken, refreshToken} = await $fetch<{
+                        accessToken: string;
+                        refreshToken: string;
+                    }>(
+                        "https://dummyjson.com/auth/login",
+                        {
+                            method: 'POST',
+                            body: {
+                                username: username,
+                                password: password,
+                                expiresInMins: expiresInMins,
+                            },
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            responseType: 'json',
+                        });
 
-                this.accessToken = accessToken;
-                this.refreshToken = refreshToken;
-                this.isAuthenticated = true;
-                this.error = null;
-            } catch (error) {
-                this.error = error;
-                this.isAuthenticated = false;
-            } finally {
-                this.state = "DONE";
-            }
-        }
-    },
-    getters: {},
-})
+                    this.accessToken = accessToken;
+                    this.refreshToken = refreshToken;
+                    this.isAuthenticated = true;
+                    this.error = null;
+                } catch (error) {
+                    this.error = error;
+                    this.isAuthenticated = false;
+                } finally {
+                    this.state = "DONE";
+                }
+            },
+            async doSignOut() {
+                this.$reset();
+            },
+            async doRefreshToken() {
+                try {
+                    this.state = "PENDING";
+                    const {accessToken, refreshToken} = await $fetch<{
+                        accessToken: string;
+                        refreshToken: string;
+                    }>(
+                        "https://dummyjson.com/auth/refresh",
+                        {
+                            method: 'POST',
+                            body: {
+                                refreshToken: this.refreshToken!, // Optional, if not provided, the server will use the cookie
+                                expiresInMins: 30, // optional (FOR ACCESS TOKEN), defaults to 60
+                            },
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            credentials: "include", // Include cookies (e.g., accessToken) in the request
+                            responseType: 'json'
+                        });
+
+                    this.accessToken = accessToken;
+                    this.refreshToken = refreshToken;
+                    this.isAuthenticated = true;
+                    this.error = null;
+                } catch (error) {
+                    this.error = error;
+                    this.isAuthenticated = false;
+                } finally {
+                    this.state = "DONE";
+                }
+            },
+        },
+    });
 

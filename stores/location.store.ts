@@ -1,4 +1,4 @@
-import {defineStore} from "pinia";
+import type {Store} from "pinia";
 
 type LocationState = {
     hostname: string;
@@ -13,30 +13,35 @@ type LocationActions = {
     updateLocation: () => void;
 }
 
-export const locationStore = defineStore<"location", LocationState, LocationGetters, LocationActions>('location', {
-    state: () => {
-        return {
-            hostname: '',
-            path: '',
-            query: {},
-            fragment: '',
-        }
-    },
-    getters: {},
-    actions: {
-        updateLocation() {
+export type LocationStoreType = ReturnType<typeof locationStore>;
 
-            const hostname = window.location.hostname ?? "";
-            const path = window.location.pathname ?? "";
-            const fragment = (window.location.hash ?? "").substring(1);
-            const queryParams = new URLSearchParams(window.location.search ?? "");
-            const query: Record<string, any> = {};
-            queryParams.forEach((value, key) => (query[key] = value));
+export const locationStoreKey = "location-key";
 
-            this.hostname = hostname;
-            this.path = path;
-            this.query = query;
-            this.fragment = fragment;
-        }
-    }
-});
+export const locationStore = defineStore(
+    'location',
+    {
+        state: () => {
+            return {
+                hostname: '',
+                path: '',
+                query: {},
+                fragment: '',
+            }
+        },
+        getters: {},
+        actions: {
+            updateLocation() {
+                const hostname = window.location.hostname ?? "";
+                const path = window.location.pathname ?? "";
+                const fragment = (window.location.hash ?? "").substring(1);
+                const queryParams = new URLSearchParams(window.location.search ?? "");
+                const query: Record<string, any> = {};
+                queryParams.forEach((value, key) => (query[key] = value));
+
+                this.hostname = hostname;
+                this.path = path;
+                this.query = query;
+                this.fragment = fragment;
+            }
+        },
+    });

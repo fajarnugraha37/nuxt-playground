@@ -1,2 +1,2 @@
-export * from "./auth.store";
-export * from "./location.store";
+export * from "./auth.hook";
+export * from "./location.hook";
