@@ -1,8 +1,8 @@
 import {FetchError} from "ofetch";
 
 type AuthState = {
-    accessToken?: string | null;
-    refreshToken?: string | null;
+    accessToken: string | null;
+    refreshToken: string | null;
     isAuthenticated: boolean;
     error?: unknown | null;
     state?: "PENDING" | "DONE" | null;
@@ -28,10 +28,16 @@ export const authStore = defineStore<
 >(
     'auth',
     {
+        persist: {
+            storage: piniaPluginPersistedstate.localStorage(),
+            omit: ['state', 'error'],
+        },
         state: () => {
             return {
                 // all these properties will have their type inferred automatically
                 isAuthenticated: false,
+                refreshToken: null,
+                accessToken: null,
             }
         },
         getters: {},

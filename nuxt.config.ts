@@ -12,6 +12,7 @@ export default defineNuxtConfig({
         '@nuxt/scripts',
         '@pinia/nuxt',
         'pinia-plugin-persistedstate/nuxt',
+        '@formkit/nuxt'
     ],
     css: ['~/assets/css/main.css'],
     pinia: {
